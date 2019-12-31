@@ -137,19 +137,17 @@ function _writeText(text, x, y, size = 8, color = 'black') {
 }
 
 function _createAnimation(name, sheet, width, height, frames) {
-    let source = __images[sheet]
+    let source = __sheets[sheet]
+    let frameOrder = []
     frames.forEach(frame => {
-        let img = document.createElement('canvas')
-        img.width = width
-        img.height = height
-        let imgCtx = img.getContext('2d')
-        let targetFrame = frame[0] || frame
-        if (frame[1] !== 'undefined' && frame[1] === true) {
-            imgCtx.translate(width, 0)
-            imgCtx.scale(-1, 1)
+        let sheetNum = frame[0] || frame
+        let sheetFlip = 1
+        if (frame[1] !== 'undefined' && (frame[1] === true || frame[1] === -1)) {
+            sheetFlip = -1
         }
-        imgCtx.drawImage(source, width * targetFrame, 0, width, height, width * targetFrame, )
+        frameOrder.push([sheetNum, sheetFlip])
     });
+    __animations[name] = frameOrder
 }
 
 function _viewWidth() {
