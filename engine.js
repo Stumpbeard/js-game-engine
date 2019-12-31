@@ -26,7 +26,37 @@ function loadAllImages() {
     const numImages = document.images.length
     for (let x = 0; x < numImages; x += 1) {
         const image = document.images[x]
-        __images[image.name] = image
+
+        // Sheet case
+        console.log(image.name.substring(0, 5))
+        if (image.name.substring(0, 5) === 'sheet') {
+            let frames = []
+            let dim = image.name.split('-')[1].split('x')
+            dim[0] = Number(dim[0])
+            dim[1] = Number(dim[1])
+            let curX = 0
+            let curY = 0
+            while (curY < image.height) {
+                console.log(curX)
+                let frame = document.createElement('canvas')
+                console.log(dim[0])
+                console.log(dim[1])
+                frame.width = dim[0]
+                frame.height = dim[1]
+                frameCtx = frame.getContext('2d')
+                frameCtx.drawImage(image, curX, curY, dim[0], dim[1], 0, 0, dim[0], dim[1])
+                frames.push(frame)
+                curX += dim[0]
+                if (curX >= image.width) {
+                    curX = 0
+                    curY += dim[1]
+                }
+            }
+            const sheetName = image.name.split('-')[2]
+            __sheets[sheetName] = frames
+        } else {
+            __images[image.name] = image
+        }
     }
 }
 
@@ -104,6 +134,22 @@ function _writeText(text, x, y, size = 8, color = 'black') {
     __mainContext.textBaseline = 'top'
     __mainContext.fillStyle = color
     __mainContext.fillText(text, x, y)
+}
+
+function _createAnimation(name, sheet, width, height, frames) {
+    let source = __images[sheet]
+    frames.forEach(frame => {
+        let img = document.createElement('canvas')
+        img.width = width
+        img.height = height
+        let imgCtx = img.getContext('2d')
+        let targetFrame = frame[0] || frame
+        if (frame[1] !== 'undefined' && frame[1] === true) {
+            imgCtx.translate(width, 0)
+            imgCtx.scale(-1, 1)
+        }
+        imgCtx.drawImage(source, width * targetFrame, 0, width, height, width * targetFrame, )
+    });
 }
 
 function _viewWidth() {
