@@ -49,7 +49,7 @@ function loadAllImages() {
                 }
             }
             const sheetName = image.name.split('-')[2]
-            __sheets[sheetName] = frames
+            __sheets[sheetName] = { frames: frames, animations: {} }
         } else {
             __images[image.name] = image
         }
@@ -88,14 +88,18 @@ function clear() {
 // HELPER FUNCTIONS
 // -------------------
 
+function _createAnimation(sheet, name, frames) {
+    __sheets[sheet]['animations'][name] = frames
+}
+
 function _colliding(ent1, ent2) {
-    const image1 = __images[ent1.image()]
+    const image1 = __images[ent1.image]
     const x1 = ent1.x
     const x1Prime = ent1.x + image1.width
     const y1 = ent1.y
     const y1Prime = ent1.y + image1.height
 
-    const image2 = __images[ent2.image()]
+    const image2 = __images[ent2.image]
     const x2 = ent2.x
     const x2Prime = ent2.x + image2.width
     const y2 = ent2.y
@@ -120,8 +124,21 @@ function _keyPressed(key) {
 }
 
 function _draw(entity) {
-    image = __images[entity.image()]
-    __mainContext.drawImage(image, entity.x, entity.y)
+    let toDraw = undefined
+    if (entity.animation) {
+        let source = __sheets[entity.image]['frames']
+        let animation = __sheets[entity.image]['animations'][entity.animation]
+        toDraw = source[animation[entity.frame]]
+        entity.rateTimer -= 1
+        if (entity.rateTimer <= 0) {
+            entity.rateTimer = entity.rate
+            entity.frame += 1
+            if (entity.frame >= animation.length) entity.frame = 0
+        }
+    } else {
+        toDraw = __images[entity.image]
+    }
+    __mainContext.drawImage(toDraw, entity.x, entity.y)
 }
 
 function _writeText(text, x, y, size = 8, color = 'black') {
