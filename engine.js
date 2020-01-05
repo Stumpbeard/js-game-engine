@@ -28,7 +28,6 @@ function loadAllImages() {
         const image = document.images[x]
 
         // Sheet case
-        console.log(image.name.substring(0, 5))
         if (image.name.substring(0, 5) === 'sheet') {
             let frames = []
             let dim = image.name.split('-')[1].split('x')
@@ -37,10 +36,7 @@ function loadAllImages() {
             let curX = 0
             let curY = 0
             while (curY < image.height) {
-                console.log(curX)
                 let frame = document.createElement('canvas')
-                console.log(dim[0])
-                console.log(dim[1])
                 frame.width = dim[0]
                 frame.height = dim[1]
                 frameCtx = frame.getContext('2d')
@@ -64,7 +60,6 @@ function loadAllSounds() {
     const sounds = document.querySelectorAll('audio')
     for (let x = 0; x < sounds.length; x++) {
         const sound = sounds[x]
-        console.log(sound)
         __sounds[sound.id] = sound
     }
 }
@@ -125,7 +120,7 @@ function _keyPressed(key) {
 }
 
 function _draw(entity) {
-    let image = __images[entity.image()]
+    image = __images[entity.image()]
     __mainContext.drawImage(image, entity.x, entity.y)
 }
 
@@ -134,20 +129,6 @@ function _writeText(text, x, y, size = 8, color = 'black') {
     __mainContext.textBaseline = 'top'
     __mainContext.fillStyle = color
     __mainContext.fillText(text, x, y)
-}
-
-function _createAnimation(name, sheet, width, height, frames) {
-    let source = __sheets[sheet]
-    let frameOrder = []
-    frames.forEach(frame => {
-        let sheetNum = frame[0] || frame
-        let sheetFlip = 1
-        if (frame[1] !== 'undefined' && (frame[1] === true || frame[1] === -1)) {
-            sheetFlip = -1
-        }
-        frameOrder.push([sheetNum, sheetFlip])
-    });
-    __animations[name] = frameOrder
 }
 
 function _viewWidth() {

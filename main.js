@@ -4,6 +4,7 @@ function _update() {
 
 function _render() {
     // __activeScene.draw()
+    man.draw()
 }
 
 class Scene {
@@ -23,7 +24,7 @@ class Scene {
             if (!entity.isActive()) {
                 return
             }
-            _draw(entity)
+            entity.draw()
         });
         this.groomEntities()
     }
@@ -43,8 +44,7 @@ class Scene {
 }
 
 class Entity {
-    constructor(image, x, y, z, scene) {
-        this.picture = image
+    constructor(x, y, z, scene) {
         this.scene = scene
         this.x = x
         this.y = y
@@ -54,8 +54,20 @@ class Entity {
         this.onCreate()
     }
 
+    setImage(image) {
+        this._image = image
+    }
+
     image() {
-        return this.picture
+        return this._image
+    }
+
+    frame() {
+        return this._frame
+    }
+
+    draw() {
+        _draw(this)
     }
 
     isActive() {
@@ -80,5 +92,7 @@ loadAllSounds()
 
 // __scenes['intro'] = introScene()
 // __activeScene = __scenes['intro']
+
+let man = new Entity(150, 150, 0, undefined)
 
 main(0)
