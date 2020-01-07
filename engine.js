@@ -94,26 +94,41 @@ function _createAnimation(sheet, name, frames) {
 }
 
 function _colliding(ent1, ent2) {
-    const image1 = __images[ent1.image]
-    const x1 = ent1.x
-    const x1Prime = ent1.x + image1.width
-    const y1 = ent1.y
-    const y1Prime = ent1.y + image1.height
+    let aX, aW, aY, aH, bX, bW, bY, bH
 
-    const image2 = __images[ent2.image]
-    const x2 = ent2.x
-    const x2Prime = ent2.x + image2.width
-    const y2 = ent2.y
-    const y2Prime = ent2.y + image2.height
+    if (!ent1.bounds) {
+        const image1 = __images[ent1.image] || __sheets[ent1.image]['frames'][ent1.frame]
+        aX = ent1.x
+        aW = ent1.x + image1.width
+        aY = ent1.y
+        aH = ent1.y + image1.height
+    } else {
+        aX = ent1.bounds.x
+        aW = aX + ent1.bounds.w
+        aY = ent1.bounds.y
+        aH = aY + ent1.bounds.h
+    }
 
-    if ((x1 <= x2 && x2 < x1Prime) || (x1 < x2Prime && x2Prime <= x1Prime) || (x1 >= x2 && x1Prime <= x2Prime) || (x1 <= x2 && x1Prime >= x2Prime)) {
-        if ((y1 <= y2 && y2 < y1Prime) || (y1 < y2Prime && y2Prime <= y1Prime) || (y1 >= y2 && y1Prime <= y2Prime) || (y1 <= y2 && y1Prime >= y2Prime)) {
+    if (!ent2.bounds) {
+        const image2 = __images[ent2.image] || __sheets[ent2.image]['frames'][ent2.frame]
+        bX = ent2.x
+        bW = bX + ent2.x + image2.width
+        bY = ent2.y
+        bH = bY + ent2.y + image2.height
+    } else {
+        bX = ent2.bounds.x
+        bW = bX + ent2.bounds.w
+        bY = ent2.bounds.y
+        bH = bY + ent2.bounds.h
+    }
+
+    if ((aX <= bX && bX < aW) || (aX < bW && bW <= aW) || (aX >= bX && aW <= bW) || (aX <= bX && aW >= bW)) {
+        if ((aY <= bY && bY < aH) || (aY < bH && bH <= aH) || (aY >= bY && aH <= bH) || (aY <= bY && aH >= bH)) {
+            console.log(aX, aW, aY, aH, bX, bW, bY, bH)
             return true
         }
     }
-
-    if (x1)
-        return false
+    return false
 }
 
 function _keyPressed(key) {

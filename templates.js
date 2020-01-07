@@ -35,8 +35,9 @@ class Scene {
 }
 
 class Entity {
-    constructor(x, y, z, scene) {
+    constructor(x, y, z, scene, bounds = undefined) {
         this.scene = scene
+        this.bounds = bounds
         this.x = x
         this.y = y
         this.zIndex = z
@@ -54,6 +55,16 @@ class Entity {
         this.frame = 0
         this.rate = rate
         this.rateTimer = rate
+    }
+
+    moveX(d) {
+        this.x += d
+        if (this.bounds) this.bounds.x += d
+    }
+
+    moveY(d) {
+        this.y += d
+        if (this.bounds) this.bounds.y += d
     }
 
     draw() {
