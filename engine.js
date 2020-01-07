@@ -19,6 +19,7 @@ function initScreen() {
     __mainViewport.width = __gameWidth * __gameScale
     __mainViewport.id = "viewport"
     __mainContext.imageSmoothingEnabled = false
+    __mainContext.scale(__gameScale, __gameScale)
     __container.append(__mainViewport)
 }
 
@@ -26,7 +27,33 @@ function loadAllImages() {
     const numImages = document.images.length
     for (let x = 0; x < numImages; x += 1) {
         const image = document.images[x]
-        __images[image.name] = image
+
+        // Sheet case
+        if (image.name.substring(0, 5) === 'sheet') {
+            let frames = []
+            let dim = image.name.split('-')[1].split('x')
+            dim[0] = Number(dim[0])
+            dim[1] = Number(dim[1])
+            let curX = 0
+            let curY = 0
+            while (curY < image.height) {
+                let frame = document.createElement('canvas')
+                frame.width = dim[0]
+                frame.height = dim[1]
+                frameCtx = frame.getContext('2d')
+                frameCtx.drawImage(image, curX, curY, dim[0], dim[1], 0, 0, dim[0], dim[1])
+                frames.push(frame)
+                curX += dim[0]
+                if (curX >= image.width) {
+                    curX = 0
+                    curY += dim[1]
+                }
+            }
+            const sheetName = image.name.split('-')[2]
+            __sheets[sheetName] = { frames: frames, animations: {} }
+        } else {
+            __images[image.name] = image
+        }
     }
 }
 
@@ -34,7 +61,6 @@ function loadAllSounds() {
     const sounds = document.querySelectorAll('audio')
     for (let x = 0; x < sounds.length; x++) {
         const sound = sounds[x]
-        console.log(sound)
         __sounds[sound.id] = sound
     }
 }
@@ -63,14 +89,18 @@ function clear() {
 // HELPER FUNCTIONS
 // -------------------
 
+function _createAnimation(sheet, name, frames) {
+    __sheets[sheet]['animations'][name] = frames
+}
+
 function _colliding(ent1, ent2) {
-    const image1 = __images[ent1.image()]
+    const image1 = __images[ent1.image]
     const x1 = ent1.x
     const x1Prime = ent1.x + image1.width
     const y1 = ent1.y
     const y1Prime = ent1.y + image1.height
 
-    const image2 = __images[ent2.image()]
+    const image2 = __images[ent2.image]
     const x2 = ent2.x
     const x2Prime = ent2.x + image2.width
     const y2 = ent2.y
@@ -95,8 +125,21 @@ function _keyPressed(key) {
 }
 
 function _draw(entity) {
-    let image = __images[entity.image()]
-    __mainContext.drawImage(image, entity.x, entity.y)
+    let toDraw = undefined
+    if (entity.animation) {
+        let source = __sheets[entity.image]['frames']
+        let animation = __sheets[entity.image]['animations'][entity.animation]
+        toDraw = source[animation[entity.frame]]
+        entity.rateTimer -= 1
+        if (entity.rateTimer <= 0) {
+            entity.rateTimer = entity.rate
+            entity.frame += 1
+            if (entity.frame >= animation.length) entity.frame = 0
+        }
+    } else {
+        toDraw = __images[entity.image]
+    }
+    __mainContext.drawImage(toDraw, entity.x, entity.y)
 }
 
 function _writeText(text, x, y, size = 8, color = 'black') {
@@ -125,4 +168,8 @@ function _playMusic(music) {
     }
     __currentSong = __sounds[music]
     __currentSong.play()
+}
+
+function goFullScreen() {
+    __mainViewport.requestFullscreen()
 }
