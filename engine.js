@@ -19,6 +19,7 @@ function initScreen() {
     __mainViewport.width = __gameWidth * __gameScale
     __mainViewport.id = "viewport"
     __mainContext.imageSmoothingEnabled = false
+    __mainContext.scale(__gameScale, __gameScale)
     __container.append(__mainViewport)
 }
 
@@ -167,4 +168,8 @@ function _playMusic(music) {
     }
     __currentSong = __sounds[music]
     __currentSong.play()
+}
+
+function goFullScreen() {
+    __mainViewport.requestFullscreen()
 }
