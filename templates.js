@@ -92,13 +92,26 @@ class Tile extends Entity {
         this.height = height
     }
 
-    draw() {
-        for (let x = 0; x < this.height * 16; x++) {
-            this.setImage('dirt')
-            _draw(this)
-            this.y -= 1
+    generateSprite() {
+        let spriteCanvas = document.createElement('canvas')
+        spriteCanvas.width = 64
+        spriteCanvas.height = 32 + 16 * this.height
+        let ctx = spriteCanvas.getContext('2d')
+        const dirt = __images['dirt']
+        const grass = __images['grass']
+        let x = 0
+        let y = spriteCanvas.height - 32
+        for (let l = 0; l < this.height * 16; l++) {
+            ctx.drawImage(dirt, x, y)
+            y -= 1
         }
-        this.setImage('grass')
+        ctx.drawImage(grass, x, y++)
+        __images[this.id] = spriteCanvas
+        this.setImage(this.id)
+    }
+
+    draw() {
+        this.y -= this.height * 16
         _draw(this)
         this.y += this.height * 16
     }
@@ -146,6 +159,7 @@ class GameMap extends Entity {
             ].reduce((prev, a) => prev + a, 0) / 5
             tile.height = Math.floor(height) // If the floor isn't here, weird shit happens
             iter++
+            tile.generateSprite()
         });
     }
 
