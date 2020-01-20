@@ -3,8 +3,7 @@ function _update() {
 }
 
 function _render() {
-    // __activeScene.draw()
-    map.draw()
+    __activeScene.draw()
 }
 
 initKeys()
@@ -12,9 +11,7 @@ initScreen()
 loadAllImages()
 loadAllSounds()
 
-// __scenes['intro'] = introScene()
-// __activeScene = __scenes['intro']
-
-let map = new GameMap(32, undefined)
+__scenes['map'] = new MapScene()
+__activeScene = __scenes['map']
 
 main(0)

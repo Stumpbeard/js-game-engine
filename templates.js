@@ -34,6 +34,16 @@ class Scene {
     }
 }
 
+class MapScene extends Scene {
+    constructor() {
+        super(
+            [
+                [GameMap, [16, 16]]
+            ]
+        )
+    }
+}
+
 class Entity {
     constructor(x, y, z, scene, bounds = undefined) {
         this.scene = scene
@@ -87,8 +97,8 @@ class Entity {
 }
 
 class Tile extends Entity {
-    constructor(x, y, height) {
-        super(x, y, 0, undefined)
+    constructor(x, y, z, height, scene) {
+        super(x, y, z, scene)
         this.height = height
     }
 
@@ -108,6 +118,13 @@ class Tile extends Entity {
         ctx.drawImage(grass, x, y++)
         __images[this.id] = spriteCanvas
         this.setImage(this.id)
+            // Should also set bounding box here
+        this.bounds = {
+            x: this.x,
+            y: this.y - this.height * 16,
+            w: 64,
+            height: 32
+        }
     }
 
     draw() {
@@ -118,54 +135,43 @@ class Tile extends Entity {
 }
 
 class GameMap extends Entity {
-    constructor(dims, scene) {
-        super(__gameWidth / 2 - 32, __gameHeight / 2 - 16 * dims, 0, scene);
-        this.tiles = []
-        this.rows = dims
-        this.cols = dims
-
-        let counter = 0
-        let curRow = 0
-        let curCol = 0
-        let yMod = 0
+    constructor(cols, rows, scene) {
+        super(__gameWidth / 2 - 32, __gameHeight / 2 - 16 * rows, 0, scene);
+        this.tileMap = []
+        this.rows = rows
+        this.cols = cols
         let xMod = 0
-        while (counter < dims * dims) {
-            let newTile = new Tile(this.x + xMod, this.y + yMod, Math.ceil(Math.random() * 5))
-            this.tiles.push(newTile)
-            counter++
-            curRow--
-            curCol++
-            xMod += 64
-            if (curCol === this.cols) {
-                yMod += 16
-                xMod = (-32 * (this.rows - 1)) + (32 * (curRow + 2))
-                curCol = curRow + 2
-                curRow = this.rows - 1
-            } else if (curRow < 0) {
-                curRow = curCol
-                curCol = 0
-                yMod += 16
-                xMod = (-32 * curRow)
+        let yMod = 0
+        let zMod = 0
+        for (let y = 0; y < rows; y++) {
+            let row = []
+            for (let x = 0; x < cols; x++) {
+                let t = new Tile(this.x + x * 32 + xMod, this.y + x * 16 + yMod, x + zMod, Math.ceil(Math.random() * 5), scene)
+                row.push(t)
+                this.scene.entities.push(t)
+            }
+            zMod++
+            xMod -= 32
+            yMod += 16
+            this.tileMap.push(row)
+        }
+
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.cols; x++) {
+                let height = [
+                    this.tileMap[y][x].height,
+                    (this.tileMap[y][x + 1] || this.tileMap[y][0]).height,
+                    (this.tileMap[y][x - 1] || this.tileMap[y][this.tileMap[y].length - 1]).height,
+                    (this.tileMap[y + 1] || this.tileMap[0])[x].height,
+                    (this.tileMap[y - 1] || this.tileMap[this.tileMap.length - 1])[x].height,
+                ].reduce((prev, a) => prev + a, 0) / 5
+                this.tileMap[y][x].height = Math.floor(height)
+                this.tileMap[y][x].generateSprite()
             }
         }
-        let iter = 0
-        this.tiles.forEach(tile => {
-            let height = [
-                tile.height,
-                (this.tiles[iter + 1] || { height: 1 }).height,
-                (this.tiles[iter - 1] || { height: 1 }).height,
-                (this.tiles[iter + dims] || { height: 1 }).height,
-                (this.tiles[iter - dims] || { height: 1 }).height,
-            ].reduce((prev, a) => prev + a, 0) / 5
-            tile.height = Math.floor(height) // If the floor isn't here, weird shit happens
-            iter++
-            tile.generateSprite()
-        });
     }
 
     draw() {
-        this.tiles.forEach(tile => {
-            tile.draw()
-        });
+        return
     }
 }
