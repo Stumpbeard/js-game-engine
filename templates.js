@@ -130,6 +130,11 @@ class Tile extends Entity {
     draw() {
         this.y -= this.height * 16
         _draw(this)
+        if (this.selected) {
+            this.setImage('highlight')
+            _draw(this)
+            this.setImage(this.id)
+        }
         this.y += this.height * 16
     }
 }
@@ -169,6 +174,39 @@ class GameMap extends Entity {
                 this.tileMap[y][x].generateSprite()
             }
         }
+
+        this.selector = {
+            x: 0,
+            y: 0
+        }
+    }
+
+    update() {
+        if (this.selectorCooldown) {
+            this.selectorCooldown -= 1
+            if (!_keyPressed('ArrowUp') && !_keyPressed('ArrowDown') && !_keyPressed('ArrowLeft') && !_keyPressed('ArrowRight'))
+                this.selectorCooldown = 0
+            return
+        }
+        this.tileMap[this.selector.y][this.selector.x].selected = false
+        if (_keyPressed('ArrowDown')) {
+            this.selector.y += 1
+            if (this.selector.y >= this.rows) this.selector.y -= 1
+        }
+        if (_keyPressed('ArrowUp')) {
+            this.selector.y -= 1
+            if (this.selector.y < 0) this.selector.y += 1
+        }
+        if (_keyPressed('ArrowLeft')) {
+            this.selector.x -= 1
+            if (this.selector.x < 0) this.selector.x += 1
+        }
+        if (_keyPressed('ArrowRight')) {
+            this.selector.x += 1
+            if (this.selector.x >= this.cols) this.selector.x -= 1
+        }
+        this.selectorCooldown = 10
+        this.tileMap[this.selector.y][this.selector.x].selected = true
     }
 
     draw() {

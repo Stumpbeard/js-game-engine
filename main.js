@@ -1,5 +1,5 @@
 function _update() {
-    // __activeScene.update()
+    __activeScene.update()
 }
 
 function _render() {
