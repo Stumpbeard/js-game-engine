@@ -5,6 +5,7 @@ let __mainViewport = document.createElement("canvas")
 let __mainContext = __mainViewport.getContext("2d")
 let __container = document.getElementById("container")
 let __keyStatus = {}
+let __keyUpQueue = []
 let __images = {}
 let __sheets = {}
 let __animations = {}

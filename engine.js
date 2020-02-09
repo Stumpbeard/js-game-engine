@@ -10,7 +10,7 @@ function initKeys() {
 
     document.addEventListener('keyup', (event) => {
         const keyPressed = event.key
-        __keyStatus[keyPressed] = false
+        __keyUpQueue.push(keyPressed)
     })
 }
 
@@ -74,9 +74,16 @@ function main(timestamp) {
     if (__interval < 0) {
         __interval = (1000 / __FPS) - (__interval * -1)
         _update()
+        processKeyUps()
         clear()
         _render()
     }
+}
+
+function processKeyUps() {
+    __keyUpQueue.forEach(key => {
+        __keyStatus[key] = false
+    });
 }
 
 function clear() {
