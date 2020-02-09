@@ -161,7 +161,7 @@ function _draw(entity) {
     } else {
         toDraw = __images[entity.image]
     }
-    __mainContext.drawImage(toDraw, entity.x, entity.y)
+    __mainContext.drawImage(toDraw, Math.floor(entity.x), Math.floor(entity.y))
 }
 
 function _writeText(text, x, y, size = 8, color = 'black') {
